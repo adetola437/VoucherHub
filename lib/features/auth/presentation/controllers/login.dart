@@ -29,11 +29,9 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   @override
-  final TextEditingController emailCtrl =
-      TextEditingController(text: 'test@mail.com');
+  final TextEditingController emailCtrl = TextEditingController();
   @override
-  final TextEditingController passwordCtrl =
-      TextEditingController(text: 'Password1@');
+  final TextEditingController passwordCtrl = TextEditingController();
   @override
   late ValueNotifier<bool> obscurePassword;
 
@@ -60,12 +58,8 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   void submit() {
-    debugPrint('Submit called');
     if (formKey.currentState?.validate() ?? false) {
-      debugPrint('Form validation passed, calling login');
       cubit.login(emailCtrl.text.trim(), passwordCtrl.text);
-    } else {
-      debugPrint('Form validation failed');
     }
   }
 }

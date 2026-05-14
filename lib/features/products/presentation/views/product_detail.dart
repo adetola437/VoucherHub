@@ -75,10 +75,17 @@ class ProductDetailView extends StatelessWidget implements ProductDetailViewCont
                   _QuantitySelector(controller: controller),
                   if (controller.product.redemptionInstructions != null) ...[
                     24.verticalSpace,
-                    Text('Redemption', style: AppTextStyles.heading3),
+                    Text('Redemption Instructions', style: AppTextStyles.heading3),
                     8.verticalSpace,
                     Text(controller.product.redemptionInstructions!,
                         style: AppTextStyles.body2),
+                  ],
+                  // ── Terms & Conditions ──────────────────────────────────────
+                  if (controller.product.termsAndConditions != null) ...[
+                    24.verticalSpace,
+                    Text('Terms & Conditions', style: AppTextStyles.heading3),
+                    8.verticalSpace,
+                    _ExpandableText(text: controller.product.termsAndConditions!),
                   ],
                   80.verticalSpace,
                 ],
@@ -102,10 +109,10 @@ class ProductDetailView extends StatelessWidget implements ProductDetailViewCont
         child: BlocConsumer<CartCubit, CartState>(
           bloc: controller.cartCubit,
           listener: (context, state) {
-            if(state is CartItemAdded){
+            if (state is CartItemAdded) {
               ScaffoldMessenger.of(context).showSnackBar(
-               const SnackBar(
-                  content:  Text('Item added to cart'),
+                const SnackBar(
+                  content: Text('Item added to cart'),
                   backgroundColor: AppColors.success,
                 ),
               );
@@ -131,6 +138,54 @@ class ProductDetailView extends StatelessWidget implements ProductDetailViewCont
   }
 }
 
+// ── Expandable T&C text ────────────────────────────────────────────────────────
+class _ExpandableText extends StatefulWidget {
+  final String text;
+  const _ExpandableText({required this.text});
+
+  @override
+  State<_ExpandableText> createState() => _ExpandableTextState();
+}
+
+class _ExpandableTextState extends State<_ExpandableText> {
+  bool _expanded = false;
+  static const int _previewLines = 4;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: REdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.text,
+            style: AppTextStyles.body2,
+            maxLines: _expanded ? null : _previewLines,
+            overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+          ),
+          8.verticalSpace,
+          GestureDetector(
+            onTap: () => setState(() => _expanded = !_expanded),
+            child: Text(
+              _expanded ? 'Show less' : 'Show more',
+              style: AppTextStyles.body2.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Amount selector ───────────────────────────────────────────────────────────
 class _AmountSelector extends StatefulWidget {
   final ProductDetailControllerContract controller;
 
@@ -185,6 +240,7 @@ class _AmountSelectorState extends State<_AmountSelector> {
   }
 }
 
+// ── Quantity selector ─────────────────────────────────────────────────────────
 class _QuantitySelector extends StatefulWidget {
   final ProductDetailControllerContract controller;
 

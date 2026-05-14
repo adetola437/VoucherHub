@@ -11,6 +11,10 @@ class CheckoutResultView extends StatelessWidget
     final color = controller.statusColor;
     final icon = controller.statusIcon;
 
+    // Pick the best available order ID to display
+    final displayOrderId = controller.result.suregiftsOrderId ??
+        controller.result.orderId;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -45,8 +49,8 @@ class CheckoutResultView extends StatelessWidget
                   height: 1.4,
                 ),
               ),
-              // Order ID Card
-              if (controller.result.orderId != null) ...[
+              // Order ID Card — only shown when we have an ID to display
+              if (displayOrderId != null) ...[
                 24.verticalSpace,
                 Container(
                   width: double.infinity,
@@ -65,7 +69,7 @@ class CheckoutResultView extends StatelessWidget
                       ),
                       8.verticalSpace,
                       Text(
-                        controller.result.suregiftsOrderId!,
+                        displayOrderId,
                         textAlign: TextAlign.center,
                         style: AppTextStyles.body1.copyWith(
                           fontWeight: FontWeight.w700,
@@ -156,7 +160,6 @@ class CheckoutResultView extends StatelessWidget
           12.verticalSpace,
           AppButton(
             label: 'View Orders',
-  
             onPressed: () => controller.navigateToOrders(context),
           ),
         ],

@@ -14,12 +14,6 @@ class CartInitial extends CartState {}
 class CartLoading extends CartState {}
 class CartUpdating extends CartState {}
 
-// class CartLoaded extends CartState {
-//   final CartModel cart;
-//   const CartLoaded(this.cart);
-//   @override
-//   List<Object?> get props => [cart];
-// }
 class CartLoaded extends CartState {
   final CartModel cart;
   final Set<String> busyIds;
@@ -38,6 +32,7 @@ class CartLoaded extends CartState {
   @override
   List<Object?> get props => [cart, busyIds, lastError, errorTimestamp];
 }
+
 class CartError extends CartState {
   final String message;
   const CartError(this.message);
@@ -80,7 +75,7 @@ class CartCubit extends Cubit<CartState> {
     );
   }
 
-   Future<void> updateItem(String cartItemId, int quantity) async {
+  Future<void> updateItem(String cartItemId, int quantity) async {
     final currentState = state;
     final CartModel currentCart;
     final Set<String> currentBusy;
@@ -163,25 +158,6 @@ class CartCubit extends Cubit<CartState> {
       },
     );
   }
-
-
-  // Future<void> updateItem(String cartItemId, int quantity) async {
-  //   emit(CartUpdating());
-  //   final result = await repository.updateCartItem(
-  //       cartItemId: cartItemId, quantity: quantity);
-  //   result.fold(
-  //     (f) => emit(CartError(f.message)),
-  //     (cart) => emit(CartLoaded(cart)),
-  //   );
-  // }
-
-  // Future<void> removeItem(String cartItemId) async {
-  //   final result = await repository.removeCartItem(cartItemId);
-  //   result.fold(
-  //     (f) => emit(CartError(f.message)),
-  //     (_) => loadCart(),
-  //   );
-  // }
 
   Future<void> clearCart() async {
     final result = await repository.clearCart();

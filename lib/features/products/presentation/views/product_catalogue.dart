@@ -138,7 +138,6 @@ class ProductCatalogueView extends StatelessWidget
             ),
           ],
         ),
-      
       ),
     );
   }
@@ -261,41 +260,6 @@ class _ShimmerGrid extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _BottomNav extends StatelessWidget {
-  final Function(int) onTap;
-
-  const _BottomNav({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      currentIndex: 0,
-      selectedItemColor: AppColors.primary,
-      unselectedItemColor: AppColors.textSecondary,
-      onTap: onTap,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.store_outlined),
-          label: 'Catalogue',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_cart_outlined),
-          label: 'Cart',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.receipt_long_outlined),
-          label: 'Orders',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.confirmation_number_outlined),
-          label: 'Vouchers',
-        ),
-      ],
     );
   }
 }

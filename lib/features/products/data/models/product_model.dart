@@ -10,6 +10,7 @@ class ProductModel extends Equatable {
   final double? maxValue;
   final List<double> denominations;
   final String? redemptionInstructions;
+  final String? termsAndConditions; // ← NEW
   final String? country;
   final String? category;
   final ProductValidity? validity;
@@ -24,6 +25,7 @@ class ProductModel extends Equatable {
     this.maxValue,
     this.denominations = const [],
     this.redemptionInstructions,
+    this.termsAndConditions,
     this.country,
     this.category,
     this.validity,
@@ -32,6 +34,15 @@ class ProductModel extends Equatable {
   bool get hasFixedDenominations => denominations.isNotEmpty;
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
+    // termsAndConditions may arrive as a List<String> or a plain String
+    String? terms;
+    final rawTerms = json['termsAndConditions'] ?? json['terms_and_conditions'];
+    if (rawTerms is List) {
+      terms = (rawTerms).map((e) => e.toString()).join('\n');
+    } else if (rawTerms != null) {
+      terms = rawTerms.toString();
+    }
+
     return ProductModel(
       id: json['code']?.toString() ?? '',
       name: json['name']?.toString(),
@@ -46,6 +57,7 @@ class ProductModel extends Equatable {
               .toList() ??
           [],
       redemptionInstructions: (json['redemptionDetails'] as List?)?.join('\n'),
+      termsAndConditions: terms,
       country: (json['countries'] as List?)?.isNotEmpty == true
           ? json['countries'][0].toString()
           : null,

@@ -52,42 +52,34 @@ class CheckoutCubit extends Cubit<CheckoutState> {
   Future<void> calculateTotal() async {
     emit(CheckoutCalculating());
     try {
-        final result = await repository.calculateTotal();
-    result.fold(
-      (f) => emit(CheckoutError(f.message)),
-      (total) {
-     
-        emit(CheckoutTotalLoaded(total));
- 
-      } ,
-    );
-    } on Error catch (e) {
-      print('Error calculating total: ${e.stackTrace. toString()}');
+      final result = await repository.calculateTotal();
+      result.fold(
+        (f) => emit(CheckoutError(f.message)),
+        (total) => emit(CheckoutTotalLoaded(total)),
+      );
+    } catch (e) {
       emit(CheckoutError(e.toString()));
     }
-  
   }
 
   Future<void> checkout() async {
     try {
-       emit(CheckoutProcessing());
-    final result = await repository.checkout();
-    result.fold(
-      (f) => emit(CheckoutError(f.message)),
-      (checkoutResult) {
-        if (checkoutResult.isFailed) {
-          emit(CheckoutFailure(
-              checkoutResult.message ?? 'Checkout failed. Please try again.'));
-        } else {
-          emit(CheckoutSuccess(checkoutResult));
-        }
-        GetIt.I<CartCubit>().loadCart();
-      },
-    );
-    }on Error catch (e) {
-      print('Error during checkout: ${e.stackTrace.toString()}');
+      emit(CheckoutProcessing());
+      final result = await repository.checkout();
+      result.fold(
+        (f) => emit(CheckoutError(f.message)),
+        (checkoutResult) {
+          if (checkoutResult.isFailed) {
+            emit(CheckoutFailure(
+                checkoutResult.message ?? 'Checkout failed. Please try again.'));
+          } else {
+            emit(CheckoutSuccess(checkoutResult));
+          }
+          GetIt.I<CartCubit>().loadCart();
+        },
+      );
+    } catch (e) {
       emit(CheckoutError(e.toString()));
     }
-   
   }
 }

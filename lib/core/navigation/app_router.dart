@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:voucher_hub/features/auth/presentation/controllers/splash.dart' show SplashScreen;
 
-import '../../config/di/app_initializer.dart';
-import '../../features/auth/cubit/auth_cubit.dart';
-import '../../features/auth/cubit/auth_state.dart';
-import '../../features/auth/presentation/screens/login_screen.dart';
+
+import '../../features/auth/presentation/controllers/login.dart';
+
 import '../../features/checkout/data/models/checkout_model.dart';
 import '../../features/products/data/models/product_model.dart';
 import '../../features/products/presentation/controllers/product_catalogue.dart';

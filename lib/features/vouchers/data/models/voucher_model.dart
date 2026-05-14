@@ -11,6 +11,8 @@ class VoucherModel extends Equatable {
   final String? voucherCode;
   final String? pin;
   final String? serialNumber;
+  final String? status;        // ← NEW
+  final String? redemptionUrl; // ← NEW
   final String? expiryDate;
   final String? suregiftsVoucherId;
   final String? suregiftsOrderId;
@@ -27,6 +29,8 @@ class VoucherModel extends Equatable {
     this.voucherCode,
     this.pin,
     this.serialNumber,
+    this.status,
+    this.redemptionUrl,
     this.expiryDate,
     this.suregiftsVoucherId,
     this.suregiftsOrderId,
@@ -45,6 +49,11 @@ class VoucherModel extends Equatable {
       voucherCode: json['voucherCode']?.toString() ?? json['voucher_code']?.toString(),
       pin: json['pin']?.toString(),
       serialNumber: json['serialNumber']?.toString() ?? json['serial_number']?.toString(),
+      status: json['status']?.toString(),
+      redemptionUrl: json['redemptionUrl']?.toString() ??
+          json['redemption_url']?.toString() ??
+          json['redeemUrl']?.toString() ??
+          json['redeem_url']?.toString(),
       expiryDate: json['expiryDate']?.toString() ?? json['expiry_date']?.toString(),
       suregiftsVoucherId: json['suregiftsVoucherId']?.toString() ?? json['suregifts_voucher_id']?.toString(),
       suregiftsOrderId: json['suregiftsOrderId']?.toString() ?? json['suregifts_order_id']?.toString(),
@@ -63,6 +72,8 @@ class VoucherModel extends Equatable {
     'voucherCode': voucherCode,
     'pin': pin,
     'serialNumber': serialNumber,
+    'status': status,
+    'redemptionUrl': redemptionUrl,
     'expiryDate': expiryDate,
     'suregiftsVoucherId': suregiftsVoucherId,
     'suregiftsOrderId': suregiftsOrderId,

@@ -47,7 +47,7 @@ class OrdersCubit extends Cubit<OrdersState> {
       (f) {
         String errorMessage = f.message != null && f.message!.isNotEmpty
             ? f.message
-            : 'An error occurred while fetching orders.';
+            : 'Orders Endpoint is currently unavailable. Please try again later.';
         emit(OrdersError(errorMessage));
       },
       (orders) => emit(OrdersLoaded(orders)),

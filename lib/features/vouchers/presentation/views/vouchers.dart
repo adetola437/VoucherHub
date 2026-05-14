@@ -127,6 +127,9 @@ class _VoucherCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                  // ── Status chip ────────────────────────────────────────────
+                  if (voucher.status != null)
+                    StatusChip(status: voucher.status!),
                 ],
               ),
             ),

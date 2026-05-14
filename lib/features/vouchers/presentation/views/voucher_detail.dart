@@ -30,7 +30,6 @@ class VoucherDetailView extends StatelessWidget implements VoucherDetailViewCont
                 controller: controller,
               );
             }
-            // Show loading while loading
             return const AppLoading();
           },
         ),
@@ -72,6 +71,14 @@ class _VoucherDetailBody extends StatelessWidget {
             24.verticalSpace,
           ],
 
+          // ── Redemption URL ─────────────────────────────────────────────────
+          if (voucher.redemptionUrl != null) ...[
+            Text('Redemption', style: AppTextStyles.heading3),
+            12.verticalSpace,
+            _RedemptionUrlCard(url: voucher.redemptionUrl!),
+            24.verticalSpace,
+          ],
+
           // Validity
           Text('Validity', style: AppTextStyles.heading3),
           12.verticalSpace,
@@ -95,6 +102,67 @@ class _VoucherDetailBody extends StatelessWidget {
             _OperationsTimeline(operations: operations),
             24.verticalSpace,
           ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── Redemption URL card ────────────────────────────────────────────────────────
+class _RedemptionUrlCard extends StatelessWidget {
+  final String url;
+  const _RedemptionUrlCard({required this.url});
+
+  Future<void> _launch() async {
+    final uri = Uri.tryParse(url);
+    if (uri != null && await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: REdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.primaryLight, width: 2),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.open_in_browser_outlined,
+              size: 20.sp, color: AppColors.primary),
+          12.horizontalSpace,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Redeem Online', style: AppTextStyles.body2
+                    .copyWith(fontWeight: FontWeight.w600)),
+                4.verticalSpace,
+                Text(
+                  url,
+                  style: AppTextStyles.caption
+                      .copyWith(color: AppColors.primary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          12.horizontalSpace,
+          ElevatedButton(
+            onPressed: _launch,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              padding: REdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r)),
+            ),
+            child: Text('Open',
+                style: AppTextStyles.label.copyWith(color: Colors.white)),
+          ),
         ],
       ),
     );
@@ -141,6 +209,11 @@ class _HeaderCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    // ── Status badge ───────────────────────────────────────
+                    if (voucher.status != null) ...[
+                      6.verticalSpace,
+                      StatusChip(status: voucher.status!),
+                    ],
                   ],
                 ),
               ),

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../../../config/flavor/app_constants.dart';
@@ -27,12 +28,16 @@ class ApiClientImpl implements IApiClient {
     );
 
     _dio.interceptors.add(_AuthInterceptor(localStorage: localStorage, dio: _dio));
-    _dio.interceptors.add(PrettyDioLogger(
-      requestHeader: true,
-      requestBody: true,
-      responseBody: true,
-      compact: true,
-    ));
+
+    // ── Only log in debug builds — never expose tokens/codes in production ──
+    if (kDebugMode) {
+      _dio.interceptors.add(PrettyDioLogger(
+        requestHeader: true,
+        requestBody: true,
+        responseBody: true,
+        compact: true,
+      ));
+    }
   }
 
   @override
@@ -56,26 +61,19 @@ class ApiClientImpl implements IApiClient {
   }) async {
     try {
       final response = await _makeRequest(endpoint, method, body, queryParams, headers);
-      
-      // Validate response data is a Map before processing
+
       if (response.data is! Map<String, dynamic>) {
         return right(fromJson(response.data));
       }
 
       final responseData = response.data as Map<String, dynamic>;
-      
-      // Check if response indicates success (status: 1 or success: true)
+
       if (_isRequestSuccessful(responseData)) {
-        // If there's a 'data' key, pass that to fromJson
         if (responseData.containsKey('data') && responseData['data'] != null) {
           return right(fromJson(responseData['data']));
         }
-        print('I am here');
-        // Otherwise pass entire response
         return right(fromJson(responseData));
       } else {
-        print('I am here too');
-        // Request returned error status
         final message = responseData['message']?.toString() ?? 'An error occurred';
         return left(ValidationFailure(message));
       }
@@ -107,7 +105,6 @@ class ApiClientImpl implements IApiClient {
     }
   }
 
-  /// Request with ApiResponse wrapper support
   Future<Either<Failure, ApiResponse<T>>> requestWithApiResponse<T>({
     required String endpoint,
     required HttpMethod method,
@@ -118,14 +115,14 @@ class ApiClientImpl implements IApiClient {
   }) async {
     try {
       final response = await _makeRequest(endpoint, method, body, queryParams, headers);
-      
+
       if (response.data is! Map<String, dynamic>) {
         throw Exception('Expected Map response but got ${response.data.runtimeType}');
       }
 
       final responseData = response.data as Map<String, dynamic>;
       final apiResponse = ApiResponse.fromJson(responseData, fromJson);
-      
+
       if (apiResponse.success) {
         return right(apiResponse);
       } else {
@@ -141,7 +138,6 @@ class ApiClientImpl implements IApiClient {
     }
   }
 
-  /// Request with PaginatedResponse wrapper support
   Future<Either<Failure, PaginatedResponse<T>>> requestWithPaginatedResponse<T>({
     required String endpoint,
     required HttpMethod method,
@@ -152,14 +148,14 @@ class ApiClientImpl implements IApiClient {
   }) async {
     try {
       final response = await _makeRequest(endpoint, method, body, queryParams, headers);
-      
+
       if (response.data is! Map<String, dynamic>) {
         throw Exception('Expected Map response but got ${response.data.runtimeType}');
       }
 
       final responseData = response.data as Map<String, dynamic>;
       final paginatedResponse = PaginatedResponse.fromJson(responseData, fromJson);
-      
+
       return right(paginatedResponse);
     } on DioException catch (e) {
       return left(_mapDioError(e));
@@ -192,17 +188,11 @@ class ApiClientImpl implements IApiClient {
     }
   }
 
-  /// Check if response indicates success
   bool _isRequestSuccessful(Map<String, dynamic> responseData) {
-    // Check for 'status: 1' or 'success: true' patterns
-    // if (responseData.containsKey('status')) {
-    //   final status = responseData['status'];
-    //   return status == 1 || status == true;
-    // }
     if (responseData.containsKey('success')) {
       return responseData['success'] == true;
     }
-    return true; // Default to success if no status field
+    return true;
   }
 
   Failure _mapDioError(DioException error) {
@@ -229,28 +219,31 @@ class ApiClientImpl implements IApiClient {
 
   Failure _mapHttpError(Response? response) {
     if (response == null) return const UnknownFailure();
-    
+
     final statusCode = response.statusCode ?? 0;
     final responseData = response.data;
 
-    // Ensure response data is a Map before accessing keys
     if (responseData is! Map<String, dynamic>) {
-      if (statusCode == 401) return  UnauthorizedFailure(responseData['message'] ?? 'Unauthorized access. Please login again.');
+      if (statusCode == 401) {
+        return UnauthorizedFailure(
+            responseData?.toString() ?? 'Unauthorized access. Please login again.');
+      }
       if (statusCode >= 500) return const ServerFailure();
       if (statusCode >= 400) {
-        return ValidationFailure(
-          responseData?.toString() ?? 'An error occurred',
-        );
+        return ValidationFailure(responseData?.toString() ?? 'An error occurred');
       }
-      return UnknownFailure('Unexpected response format');
+      return const UnknownFailure('Unexpected response format');
     }
 
-    if (statusCode == 401) return  UnauthorizedFailure(responseData['message'] ??'Unauthorized access. Please login again.');
-    
+    if (statusCode == 401) {
+      return UnauthorizedFailure(
+          responseData['message'] ?? 'Unauthorized access. Please login again.');
+    }
+
     if (statusCode == 422 || statusCode == 400) {
       final message = responseData['message']?.toString() ?? 'Validation error';
       final errors = responseData['errors'];
-      
+
       if (errors is Map && errors.isNotEmpty) {
         final firstErrorKey = errors.keys.first;
         final firstError = errors[firstErrorKey];
@@ -262,7 +255,7 @@ class ApiClientImpl implements IApiClient {
     }
 
     if (statusCode >= 500) return const ServerFailure();
-    
+
     final message = responseData['message']?.toString() ?? 'An error occurred';
     return ValidationFailure(message);
   }
